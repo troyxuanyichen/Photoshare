@@ -24,12 +24,25 @@ source ./schema.sql
 ```
 Now quit MySQL (enter CTRL-D or \q)
 
-##Application Setup:
+##Application Setup(Mac):
 ```
 virtualenv photoenv
 source photoenv/bin/activate #use photoenv/Scripts/activate on windows
 pip install -r requirements.txt
 python app.py
+```
+Install the flask login module first  
+```
+sudo pip install flask-login
+```
+You can check it is installed successfully by using  
+```
+pip show flask-login
+```
+To start the app, use  
+```
+export FLASK_APP=app.py
+flask run
 ```
 
 You can now point your favorite web brower to [localhost:5000](localhost:5000) to see your web app. 
