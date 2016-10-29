@@ -23,12 +23,6 @@ app.config.from_object('config')
 
 app.secret_key = 'super secret string'  # Change this to what?
 
-# #These will need to be changed according to your creditionals
-# app.config['MYSQL_DATABASE_USER'] = 'root'
-# app.config['MYSQL_DATABASE_PASSWORD'] = '19910923troy'
-# # app.config['MYSQL_DATABASE_DB'] = 'photoshare'
-# app.config['MYSQL_DATABASE_DB'] = 'photo_schema'
-# app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 print app.config['MYSQL_DATABASE_USER']
 mysql.init_app(app)
 
