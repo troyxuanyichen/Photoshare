@@ -19,14 +19,17 @@ import os, base64
 
 mysql = MySQL()
 app = Flask(__name__)
-app.secret_key = 'super secret string'  # Change this!
+app.config.from_object('config')
 
-#These will need to be changed according to your creditionals
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = '19910923troy'
-# app.config['MYSQL_DATABASE_DB'] = 'photoshare'
-app.config['MYSQL_DATABASE_DB'] = 'photo_schema'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.secret_key = 'super secret string'  # Change this to what?
+
+# #These will need to be changed according to your creditionals
+# app.config['MYSQL_DATABASE_USER'] = 'root'
+# app.config['MYSQL_DATABASE_PASSWORD'] = '19910923troy'
+# # app.config['MYSQL_DATABASE_DB'] = 'photoshare'
+# app.config['MYSQL_DATABASE_DB'] = 'photo_schema'
+# app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+print app.config['MYSQL_DATABASE_USER']
 mysql.init_app(app)
 
 #begin code used for login
