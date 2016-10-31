@@ -18,14 +18,12 @@ import flask.ext.login as flask_login
 from werkzeug import secure_filename
 import os, base64
 from controller import userController as userController
-#from controller import photoController as photoController
+from controller import photoController as photoController
 
 mysql = MySQL()
 app = Flask(__name__)
 app.config.from_object('config')
 app.secret_key = 'cas660 project 1'
-
-# print app.config['MYSQL_DATABASE_USER']
 mysql.init_app(app)
 
 #begin code used for login
@@ -70,6 +68,9 @@ A new page looks like this:
 def new_page_function():
 	return new_page_html
 '''
+# @app.route('/', methods=['GET'])
+# def default():
+# 	return 'hehe'
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -116,7 +117,7 @@ def register_user():
 		lastName=request.form.get('lastName')
 		birthday=request.form.get('birthday')
 		hometown=request.form.get('hometown')
-		gender=request.form.get('gender')
+		gender=request.form.get('gender')	#allow gender to be null		
 	except:
 		print "couldn't find all tokens" #this prints to shell, end users will not see this (all print statements go to shell)
 		return flask.redirect(flask.url_for('register'))
@@ -149,14 +150,16 @@ def allowed_file(filename):
 
 @app.route('/upload', methods=['GET', 'POST'])
 @flask_login.login_required
-def upload_file():
+def upload_photo():
 	if request.method == 'POST':
+		print 'begin upload'
 		uid = userController.getUserIdFromEmail(flask_login.current_user.id)
-		imgfile = request.files['file']
+		print 'uid = ' + str(uid)
+		caption = request.form.get('caption')
+		albumId = 1
+		imgfile = request.files['photo']
 		photo_data = base64.statementsndard_b64encode(imgfile.read())
-		cursor = conn.cursor()
-		cursor.execute("INSERT INTO photos (data, user_id) VALUES ('{0}', '{1}' )".format(photo_data,uid))   #todo
-		conn.commit()
+		photoController.uploadPhoto(albumId, caption, photo_data)
 		return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=userController.getUsersPhotos(uid))
 	#The method is GET so we return a  HTML form to upload the a photo.
 	else:

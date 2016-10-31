@@ -5,11 +5,11 @@
     <div class="title">
         <h1>Upload a photo to Photoshare</h1>
     </div>
-    <form method="post" action="{{ url_for('upload_photo') }}">
+    <form method="post" action="{{ url_for('upload_photo') }}" enctype="multipart/form-data">
         <label for="photo">Select photo:</label>
-        <input type="file" name="photo" required='true' /><br />
+        <input type="file" name="photo" required='true'/><br />
         <label for="caption">Please caption:</label>
-        <input type="text" name="caption" required='true' /><br />
-        <input type="submit" value="Upload" />
+        <input type="text" name="caption" required='true'/><br />
+        <input type="submit" value="Upload"/>
     </form>
 </body>
