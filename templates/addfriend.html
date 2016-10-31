@@ -1,0 +1,27 @@
+<head>
+	<title>Add a friend!</title>
+</head>
+<body>
+	<div>
+		<p>Your friend</p>
+		<ul name="friends">
+			{% if friends %}
+				{% for friend in friends %}
+					<li>friend</li>
+				{% endfor %}
+			{% else %}
+				<p>Lets add a friend first</p>
+			{% endif %}
+		</ul>
+	</div>
+	<div>
+		<p>All the users</p>
+		<ul name="users">
+			{% if users %}
+			{% for user in users %}
+			<li>user</li>
+			{% endfor %}
+			{% endif %}
+		</ul>
+	</div>
+</body>

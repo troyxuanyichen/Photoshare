@@ -16,14 +16,15 @@ import flask.ext.login as flask_login
 #for image uploading
 from werkzeug import secure_filename
 import os, base64
+from controller import userController as userController
+#from controller import photoController as photoController
 
 mysql = MySQL()
 app = Flask(__name__)
 app.config.from_object('config')
+app.secret_key = 'cas660 project 1'
 
-app.secret_key = 'super secret string'  # Change this to what?
-
-print app.config['MYSQL_DATABASE_USER']
+# print app.config['MYSQL_DATABASE_USER']
 mysql.init_app(app)
 
 #begin code used for login
@@ -35,17 +36,12 @@ cursor = conn.cursor()
 cursor.execute("SELECT email from Users") 
 users = cursor.fetchall()
 
-def getUserList():
-    cursor = conn.cursor()
-    cursor.execute("SELECT email from Users") 
-    return cursor.fetchall()
-
 class User(flask_login.UserMixin):
     pass
 
 @login_manager.user_loader
 def user_loader(email):
-    users = getUserList()
+    users = userController.getUserList()
     if not(email) or email not in str(users):
         return
     user = User()
@@ -54,7 +50,7 @@ def user_loader(email):
 
 @login_manager.request_loader
 def request_loader(request):
-    users = getUserList()
+    users = userController.getUserList()
     email = request.form.get('email')
     if not(email) or email not in str(users):
         return
@@ -130,7 +126,7 @@ def register_user():
         print "couldn't find all tokens" #this prints to shell, end users will not see this (all print statements go to shell)
         return flask.redirect(flask.url_for('register'))
     cursor = conn.cursor()
-    test =  isEmailUnique(email)
+    test =  userController.isEmailUnique(email)
     if test:
         print cursor.execute("INSERT INTO Users (email, password, firstName, lastName, birthday, hometown, gender) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')".format(email, password, firstName, lastName, birthday, hometown, gender))
         conn.commit()
@@ -142,25 +138,6 @@ def register_user():
     else:
         print "couldn't find all tokens"
         return flask.redirect(flask.url_for('register'))
-
-def getUsersPhotos(uid):
-    cursor = conn.cursor()
-    cursor.execute("SELECT imgdata, picture_id FROM Pictures WHERE user_id = '{0}'".format(uid))
-    return cursor.fetchall() #NOTE list of tuples, [(imgdata, pid), ...]
-
-def getUserIdFromEmail(email):
-    cursor = conn.cursor()
-    cursor.execute("SELECT user_id  FROM Users WHERE email = '{0}'".format(email))
-    return cursor.fetchone()[0]
-
-def isEmailUnique(email):
-    #use this to check if a email has already been registered
-    cursor = conn.cursor()
-    if cursor.execute("SELECT email  FROM Users WHERE email = '{0}'".format(email)): 
-        #this means there are greater than zero entries with that email
-        return False
-    else:
-        return True
 #end login code
 
 @app.route('/profile')
@@ -178,13 +155,13 @@ def allowed_file(filename):
 @flask_login.login_required
 def upload_file():
     if request.method == 'POST':
-        uid = getUserIdFromEmail(flask_login.current_user.id)
+        uid = userController.getUserIdFromEmail(flask_login.current_user.id)
         imgfile = request.files['file']
-	photo_data = base64.standard_b64encode(imgfile.read())
+        photo_data = base64.statementsndard_b64encode(imgfile.read())
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO Pictures (imgdata, user_id) VALUES ('{0}', '{1}' )".format(photo_data,uid))
+        cursor.execute("INSERT INTO photos (imgdata, user_id) VALUES ('{0}', '{1}' )".format(photo_data,uid))   #todo
         conn.commit()
-	return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=getUsersPhotos(uid) )
+	return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=userController.getUsersPhotos(uid) )
     #The method is GET so we return a  HTML form to upload the a photo.
     return '''
         <!doctype html>
@@ -198,6 +175,13 @@ def upload_file():
         '''
 #end photo uploading code 
 
+
+#begin show users function, require login
+@app.route('/users', methods=['GET'])
+@flask_login.login_required
+def add_friend():
+    uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+    users = getAllOtherUser(uid)
 
 #default page  
 @app.route("/", methods=['GET'])
