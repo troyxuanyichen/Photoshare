@@ -46,6 +46,7 @@ flask run
 ```
 To debug the application, in the folder 'Photoshare-Skeleton', use
 ```
+export FLASK_APP=app.py
 export FLASK_DEBUG=1
 flask run
 ```
