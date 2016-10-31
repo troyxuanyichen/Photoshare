@@ -1,4 +1,3 @@
-<!-- author ben lawson (balawson@bu.edu) -->
 <!doctype html>
 {% if message %}
   <h4>{{message}}!</h4>
@@ -28,8 +27,10 @@
 
 <ul>
 <li><a href='/upload'>Upload a photo</a> </li> 
-<li><a href=""></a></li>
+{% if name %}
+<li><a href="/friend">View friends</a></li>
 <li><a href='/logout'>Logout</a></li>
+{% endif %}
 <li><a href='/'>Home</a></li>
 </ul>
 

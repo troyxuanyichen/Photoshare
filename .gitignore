@@ -3,3 +3,4 @@ schema.sql
 config.py
 app.pyc
 config.pyc
+*.pyc
