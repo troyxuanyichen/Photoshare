@@ -44,5 +44,10 @@ To start the app, use
 export FLASK_APP=app.py
 flask run
 ```
+To debug the application, in the folder 'Photoshare-Skeleton', use
+```
+export FLASK_DEBUG=1
+flask run
+```
 
 You can now point your favorite web brower to [localhost:5000](localhost:5000) to see your web app. 
