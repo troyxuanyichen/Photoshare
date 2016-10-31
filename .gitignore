@@ -4,3 +4,4 @@ config.py
 app.pyc
 config.pyc
 *.pyc
+/controller/*.pyc

@@ -158,7 +158,7 @@ def upload_photo():
 		caption = request.form.get('caption')
 		albumId = 1
 		imgfile = request.files['photo']
-		photo_data = base64.statementsndard_b64encode(imgfile.read())
+		photo_data = base64.standard_b64encode(imgfile.read())
 		photoController.uploadPhoto(albumId, caption, photo_data)
 		return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=userController.getUsersPhotos(uid))
 	#The method is GET so we return a  HTML form to upload the a photo.
