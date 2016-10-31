@@ -5,3 +5,4 @@ app.pyc
 config.pyc
 *.pyc
 /controller/*.pyc
+/sql
