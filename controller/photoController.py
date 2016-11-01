@@ -4,15 +4,20 @@ from connection import initConnection as connection
 def getPhotos():
 	conn = connection.init_connection()
 	cursor = conn.cursor()
-	cursor.execute("SELECT P.data, P.photoId FROM photos P")
+	cursor.execute("SELECT P.photoId, P.data FROM photos P")
 	return cursor.fetchall() #NOTE list of tuples, [(data, photoId), ...]
 
 #get all the photo from an album
-def getPhotosFromAlbum(aid):
+def getPhotoFromAlbum(aid):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
-	cursor.execute("SELECT data, photoId FROM photos WHERE albumId = '{0}".format(aid))
+	cursor.execute("SELECT photoId, data FROM photos WHERE albumId = '{0}'".format(aid))
 	return cursor.fetchall()
+#get all the photo from a user
+def getPhotoFromUser(uid):
+	conn = connection.init_connection()
+	cursor = conn.cursor()
+	cursor.execute("SELECT photoId, data FROM photos P, photo_album PA, album A WHERE P.albumId = PA.albumId AND PA.albumId = A.albumId AND A.ownerId = '{0}".format(uid))
 
 #get photo id from photo data
 def getIdFromData(data):

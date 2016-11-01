@@ -1,0 +1,16 @@
+<head>
+    <title>Your photos</title>
+</head>
+{% if message %}
+  <h4>{{message}}!</h4>
+{% endif %}
+{% if photos %}
+	<p>Your photos in {{aname}}</p>
+	<ul name="photos">
+		{% for photo in photos %}
+			<li>
+				<img src='data:image/png;base64, {{photo[0]}}'>
+			</li>
+		{% endfor %}
+	</ul>
+{% endif %}

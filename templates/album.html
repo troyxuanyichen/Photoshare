@@ -1,0 +1,26 @@
+<head>
+    <title>Your albums</title>
+</head>
+{% if message %}
+  <h4>{{message}}!</h4>
+{% endif %}
+
+{% if albums %}
+	<form method="POST" action="{{ url_for('show_photos') }}">
+		<p>Your albums</p>
+		<select name="albums">
+			{% for album in albums %}
+				<option value={{album[0]}}>{{album[1]}}</option>
+			{% endfor %}
+		</select>
+		<input type="submit" name="view" value="View photos"></input>
+	</form>
+{% else %}
+	<p>Let's create an album first</p>
+{% endif %}
+
+<form method="POST" action="{{ url_for('add_album') }}">
+	<label for="name">Enter album name:</label>
+	<input type="text" name="name"></input><br/>
+	<input type="submit" name="Add album"></input>
+</form>

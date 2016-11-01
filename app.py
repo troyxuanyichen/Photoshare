@@ -1,5 +1,6 @@
 ######################################
-# author Xuanyi Chen <troychen@bu.edu> 
+# author ben lawson <balawson@bu.edu>
+# edited by Xuanyi Chen <troychen@bu.edu> 
 ######################################
 # Some code adapted from 
 # CodeHandBook at http://codehandbook.org/python-web-application-development-using-flask-and-mysql/
@@ -10,6 +11,7 @@
 ###################################################
 
 import flask
+import datetime
 from flask import Flask, Response, request, render_template, redirect, url_for
 from flaskext.mysql import MySQL
 import flask.ext.login as flask_login
@@ -19,6 +21,8 @@ from werkzeug import secure_filename
 import os, base64
 from controller import userController as userController
 from controller import photoController as photoController
+from controller import albumController as albumController
+
 
 mysql = MySQL()
 app = Flask(__name__)
@@ -116,6 +120,7 @@ def register_user():
 		firstName=request.form.get('firstName')
 		lastName=request.form.get('lastName')
 		birthday=request.form.get('birthday')
+		print birthday	#may be empty
 		hometown=request.form.get('hometown')
 		gender=request.form.get('gender')	#allow gender to be null		
 	except:
@@ -133,7 +138,7 @@ def register_user():
 		flask_login.login_user(user)
 		return render_template('hello.html', name=email, message='Account Created!')
 	else:
-		print "couldn't find all tokens"
+		print "Email already been used"	#correct this
 		return flask.redirect(flask.url_for('register'))
 #end login code
 
@@ -155,12 +160,17 @@ def upload_photo():
 		print 'begin upload'
 		uid = userController.getUserIdFromEmail(flask_login.current_user.id)
 		print 'uid = ' + str(uid)
-		caption = request.form.get('caption')
-		albumId = 1
-		imgfile = request.files['photo']
+		try:
+			caption = request.form.get('caption')
+			albumId = request.form.get('albums')
+			imgfile = request.files['photo']
+		except:
+			print "couldn't find all tokens" 
+		return flask.render_template('upload.html', message="couldn't find all tokens")
+
 		photo_data = base64.standard_b64encode(imgfile.read())
 		photoController.uploadPhoto(albumId, caption, photo_data)
-		return render_template('hello.html', name=flask_login.current_user.id, message='Photo uploaded!', photos=userController.getUsersPhotos(uid))
+		return render_template('hello.html', name=flask_login.current_user.id, message="Photo uploaded!", photos=userController.getUsersPhotos(uid))
 	#The method is GET so we return a  HTML form to upload the a photo.
 	else:
 		return render_template('upload.html')   #TODO
@@ -182,14 +192,51 @@ def view_users():
 def add_friend():
 	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
 	friendId = request.form.get('users')    #may not work since have to select the current value
-	print friendId
 	userController.addFriend(uid, friendId)
 	return render_template('hello.html', name=flask_login.current_user.id, message='Friend added')
+
+#show album page, require login
+@app.route('/album', methods=['GET'])
+@flask_login.login_required
+def view_albums():
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	albums = albumController.getUserAlbumLimited(uid)
+	return render_template('album.html', albums=albums)
+
+#add another album to the user, require login
+@app.route('/album', methods=['POST'])
+@flask_login.login_required
+def add_album():
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	date = datetime.date.today()
+	try:
+		name = request.form.get('name')
+	except:
+		print "Please enter the name of the album"
+		return flask.redirect(flask.url_for('add_album'))
+	if albumController.addAlbum(name, uid, date):
+		albums = albumController.getUserAlbumLimited(uid)
+		return render_template('album.html', message='Album added', albums=albums)
+	else:
+		return render_template('album.html', message='Fail to add album')
+
+#show photos in an album, require login
+@app.route('/photo', methods=['POST'])	#cannot use get here
+@flask_login.login_required
+def show_photos():
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	aid = request.form.get('albums')
+	aname = albumController.getNameFromAlbumId(aid)
+	photos = photoController.getPhotoFromAlbum(aid)
+	return render_template('photo.html', photos=photos, aname=aname)
+
+#show photos in an album, require login
 
 #default page  
 @app.route("/", methods=['GET'])
 def hello():
-	return render_template('hello.html', message='Welecome to Photoshare')
+	photos = photoController.getPhotos()
+	return render_template('hello.html', message='Welecome to Photoshare', photos=photos)
 
 
 if __name__ == "__main__":

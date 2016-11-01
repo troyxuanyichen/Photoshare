@@ -17,7 +17,7 @@
 	<div>
 		<form method="post" action="{{ url_for('add_friend') }}">
 			<p>People you may know</p>
-			<select name="users" size="1">
+			<select name="users">
 				{% if users %}
 					{% for user in users %}
 						<option value={{user[0]}}>{{user[1]}}</option>
