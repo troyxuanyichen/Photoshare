@@ -8,10 +8,14 @@
 {% endif %}
 
 {% if photos %}
-<h2>Here's your photos</h2>
+<h2>Here's all the photos</h2>
     <ul>
     {% for photo in photos %}
-        <li><img src='data:image/png;base64, {{photo[0]}}'/></li>
+        <li>
+        	<img src="data:image/png;base64, {{photo[1]}}" style="height: 100px"/>
+        	<input type="submit" name="MySecondBtn" value="like" OnClick="document.forms['MyForm'].action = 'Destination2.aspx'" >
+        	<input type="submit" name="MySecondBtn" value="comment" OnClick="document.forms['MyForm'].action = 'Destination2.aspx'" >
+        </li>
     {% endfor %}
     </ul>
 {% endif %}

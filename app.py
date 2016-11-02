@@ -22,6 +22,9 @@ import os, base64
 from controller import userController as userController
 from controller import photoController as photoController
 from controller import albumController as albumController
+from controller import likeController as likeController
+from controller import tagController as tagController
+from controller import commentController as commentController
 
 
 mysql = MySQL()
@@ -119,7 +122,7 @@ def register_user():
 		password=request.form.get('password')
 		firstName=request.form.get('firstName')
 		lastName=request.form.get('lastName')
-		birthday=request.form.get('birthday')
+		birthday=request.form.get('birthday')	#default to today
 		print birthday	#may be empty
 		hometown=request.form.get('hometown')
 		gender=request.form.get('gender')	#allow gender to be null		
@@ -167,13 +170,15 @@ def upload_photo():
 		except:
 			print "couldn't find all tokens" 
 		return flask.render_template('upload.html', message="couldn't find all tokens")
-
 		photo_data = base64.standard_b64encode(imgfile.read())
 		photoController.uploadPhoto(albumId, caption, photo_data)
 		return render_template('hello.html', name=flask_login.current_user.id, message="Photo uploaded!", photos=userController.getUsersPhotos(uid))
 	#The method is GET so we return a  HTML form to upload the a photo.
 	else:
-		return render_template('upload.html')   #TODO
+		uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+		albums = albumController.getUserAlbum(uid)
+		tags = tagController.showTags()
+		return render_template('upload.html', albums=albums, tags=tags)   #TODO
 #end photo uploading code 
 
 
@@ -221,16 +226,34 @@ def add_album():
 		return render_template('album.html', message='Fail to add album')
 
 #show photos in an album, require login
-@app.route('/photo', methods=['POST'])	#cannot use get here
+@app.route('/photo?action=show', methods=['POST'])	#cannot use get here
 @flask_login.login_required
 def show_photos():
 	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
 	aid = request.form.get('albums')
 	aname = albumController.getNameFromAlbumId(aid)
 	photos = photoController.getPhotoFromAlbum(aid)
-	return render_template('photo.html', photos=photos, aname=aname)
+	return render_template('photo.html', photos=photos, aname=aname, aid=aid)	#jump to photo page
 
-#show photos in an album, require login
+#view a photo, require login
+@app.route('/managephoto/<pid>', methods=['POST'])	#cannot use get here
+@flask_login.login_required
+def manage_photo(pid):
+	photo = photoController.getPhotoById(pid)	#id, caption, data
+	ownder = photoController.getPhotoOwner(pid)
+	tags = tagController.showPhotoTags(pid)
+	comments = commentController.showComment(pid)
+	return render_template('photo_manage.html', photo=photo, owner=owner, tags=tags, comments=comments)
+
+
+#delete photos in an album, require login
+@app.route('/photo?action=delete', methods=['POST'])	#cannot use get here
+@flask_login.login_required
+def delete_photo():
+	print 'photo deleted'
+	# pid = 
+	# if photoController.deletePhoto(pid):
+	# 	return 
 
 #default page  
 @app.route("/", methods=['GET'])

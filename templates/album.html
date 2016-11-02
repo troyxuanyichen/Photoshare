@@ -20,7 +20,10 @@
 {% endif %}
 
 <form method="POST" action="{{ url_for('add_album') }}">
-	<label for="name">Enter album name:</label>
+  	<fieldset>
+	<legend>Create album:</legend>
+	<label for="name">Enter a new album name:</label>
 	<input type="text" name="name"></input><br/>
 	<input type="submit" name="Add album"></input>
+	</fieldset>
 </form>

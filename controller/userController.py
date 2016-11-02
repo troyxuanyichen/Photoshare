@@ -49,7 +49,7 @@ def addFriend(uid, friendId):
 	# 	return False
 
 #get the photo of the user
-def getUsersPhotos(uid):
+def getUserPhotos(uid):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
 	cursor.execute("SELECT P.data, P.photoId FROM photos P, photo_album PA, albums A WHERE P.photoId = PA.photoId AND PA.albumId = A.albumId AND A.ownerId = '{0}'".format(uid))

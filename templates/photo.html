@@ -1,16 +1,54 @@
 <head>
     <title>Your photos</title>
+    <script src="jquery-3.1.1.min.js"></script>
 </head>
 {% if message %}
   <h4>{{message}}!</h4>
 {% endif %}
 {% if photos %}
 	<p>Your photos in {{aname}}</p>
-	<ul name="photos">
+	<ul id="photolist" name="photos">
 		{% for photo in photos %}
 			<li>
-				<img src='data:image/png;base64, {{photo[0]}}'>
+				<a href='/managephoto/{{photo[0]}}'>
+					<img src='data:image/png;base64, {{photo[1]}}'>
+				</a>
 			</li>
 		{% endfor %}
 	</ul>
+	<button>Delete photo</button>
 {% endif %}
+
+<form method="post" action="{{ url_for('upload_photo') }}" enctype="multipart/form-data">
+    <label for="photo">Select photo:</label>
+    <input type="file" name="photo" required='true'/><br />
+    <label for="caption">Please caption:</label>
+    <input type="text" name="caption" required='true'/><br />
+
+    <select name="albums">
+        {% if aid %}
+            {% for album in albums %}
+                <option value={{album[0]}}>{{album[1]}}</option>
+            {% endfor %}
+        {% endif %}
+    </select>
+    <input type="submit" value="Upload"/>
+ </form>
+<!-- <script>
+
+$("#deletePhoto").click(function(){
+	alert("Are you sure you want to delete the photo?");
+	$.ajax({
+   		type:'GET',
+   		dataType: 'json',
+   		url :"/tournament",
+   		success: function(data) {
+        	console.log('success',data);
+   		},
+   		error:function(jqXHR,textStatus,errorThrown ){
+      		alert('Exception:'+errorThrown );
+   		}
+	});
+}); 
+</script>
+ -->

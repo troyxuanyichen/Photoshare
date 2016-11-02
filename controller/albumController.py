@@ -11,7 +11,7 @@ def getUserAlbumLimited(uid):
 def getUserAlbum(uid):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
-	cursor.execute("SELECT albumId, name FROM albums WHERE ownerId = '{0}'".format(uid))
+	cursor.execute("SELECT albumId, name, date FROM albums WHERE ownerId = '{0}'".format(uid))
 	return cursor.fetchall() 
 
 #add an album to a user
@@ -30,3 +30,13 @@ def getNameFromAlbumId(aid):
 	cursor = conn.cursor()
 	cursor.execute("SELECT name FROM albums WHERE albumId = '{0}'".format(aid))
 	return cursor.fetchone()[0]
+
+#delete the album
+def deleteAlbum(aid):
+	conn = connection.int_connection()
+	cursor = conn.cursor()
+	if cursor.execute("DELETE FROM albums WHERE albumId = '{0}'".format(aid)):
+		return True
+	else:
+		return False
+
