@@ -166,21 +166,25 @@ def upload_photo():
 		try:
 			caption = request.form.get('caption')
 			albumId = request.form.get('albums')
+			tagStr = request.form.get('tags')
 			imgfile = request.files['photo']
 		except:
 			print "couldn't find all tokens" 
-		return flask.render_template('upload.html', message="couldn't find all tokens")
+			return flask.render_template('upload.html', message="couldn't find all tokens")
+		tags = tagController.strToTags(tagStr)
 		photo_data = base64.standard_b64encode(imgfile.read())
 		photoController.uploadPhoto(albumId, caption, photo_data)
-		return render_template('hello.html', name=flask_login.current_user.id, message="Photo uploaded!", photos=userController.getUsersPhotos(uid))
+		pid = photoController.getIdFromData(photo_data)
+		for tag in tags:
+			tagController.addTagToPhoto(pid, tag)
+		return render_template('hello.html', name=flask_login.current_user.id, message="Photo uploaded!", photos=photoController.getPhotos())
 	#The method is GET so we return a  HTML form to upload the a photo.
 	else:
 		uid = userController.getUserIdFromEmail(flask_login.current_user.id)
 		albums = albumController.getUserAlbum(uid)
-		tags = tagController.showTags()
-		return render_template('upload.html', albums=albums, tags=tags)   #TODO
+		#tags = tagController.showTags()
+		return render_template('upload.html', albums=albums)   #TODO
 #end photo uploading code 
-
 
 #display the friend page
 @app.route('/friend', methods=['GET'])
@@ -225,41 +229,161 @@ def add_album():
 	else:
 		return render_template('album.html', message='Fail to add album')
 
+#delete the album, require lobin
+@app.route('/album?action=delete', methods=['POST'])
+@flask_login.login_required
+def delete_album():
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	aid = request.form.get('album')
+	albumController.deleteAlbum(aid)
+	albums = albumController.getUserAlbumLimited(uid)
+	return render_template('album.html', message='Album deleted', albums=albums)
+
 #show photos in an album, require login
 @app.route('/photo?action=show', methods=['POST'])	#cannot use get here
 @flask_login.login_required
 def show_photos():
 	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
 	aid = request.form.get('albums')
-	aname = albumController.getNameFromAlbumId(aid)
+	aname = albumController.getNameFromAlbumId(aid)[0]
 	photos = photoController.getPhotoFromAlbum(aid)
 	return render_template('photo.html', photos=photos, aname=aname, aid=aid)	#jump to photo page
 
-#view a photo, require login
-@app.route('/managephoto/<pid>', methods=['POST'])	#cannot use get here
-@flask_login.login_required
-def manage_photo(pid):
-	photo = photoController.getPhotoById(pid)	#id, caption, data
-	ownder = photoController.getPhotoOwner(pid)
-	tags = tagController.showPhotoTags(pid)
-	comments = commentController.showComment(pid)
-	return render_template('photo_manage.html', photo=photo, owner=owner, tags=tags, comments=comments)
-
-
 #delete photos in an album, require login
-@app.route('/photo?action=delete', methods=['POST'])	#cannot use get here
+@app.route('/deletephoto/<pid>', methods=['GET'])	#cannot use get here
 @flask_login.login_required
-def delete_photo():
-	print 'photo deleted'
+def delete_photo(pid):
+	print "pid: " + str(pid)
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	user = userController.getUserFromId(uid)
+	aid = albumController.getAlbumIdFromPhoto(pid)[0]
+	print "aid: " + str(aid)
+	aname = albumController.getNameFromAlbumId(aid)[0]
+	photoController.deletePhoto(pid)
+	photos = photoController.getPhotoFromAlbum(aid)
+	return render_template('photo.html', message='Photo deleted', photos=photos, aname=aname, aid=aid)
 	# pid = 
 	# if photoController.deletePhoto(pid):
 	# 	return 
+	
+#upload to a specific album
+@app.route('/uploadtoalbum/<aid>', methods=['GET', 'POST'])
+@flask_login.login_required
+def upload_to_album(aid):
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	aname = albumController.getNameFromAlbumId(aid)
+	try:
+		caption = request.form.get('caption')
+		tagStr = request.form.get('tags')
+		imgfile = request.files['photo']
+	except:
+		print "couldn't find all tokens"
+		photos = photoController.getPhotoFromAlbum(aid)
+		return render_template('photo.html', message="couldn't find all tokens", aid=aid, aname=aname)
+	tags = tagController.strToTags(tagStr)
+	photo_data = base64.standard_b64encode(imgfile.read())
+	photoController.uploadPhoto(aid, caption, photo_data)
+	pid = photoController.getIdFromData(photo_data)
+	print "pid: " + str(pid)
+	for tag in tags:
+		tagController.addTagToPhoto(pid, tag)
+	photos = photoController.getPhotoFromAlbum(aid)
+	return render_template('photo.html', message="Photo uploaded", aid=aid, aname=aname, photos=photos)
+
+#view a photo, require login
+@app.route('/managephoto/<pid>', methods=['GET'])	#cannot use get here
+@flask_login.login_required
+def manage_photo(pid):
+	photo = photoController.getPhotoById(pid)	#id, caption, data
+	ownerId = photoController.getPhotoOwner(pid)
+	tags = tagController.showPhotoTags(pid)
+	people = likeController.showPeopleWhoLike(pid)
+	comments = commentController.showComment(pid)
+	return render_template('photo_manage.html', photo=photo, ownerId=ownerId, tags=tags, comments=comments, people=people)
+
+#like a photo on default page, require login
+@app.route('/comment/like/<pid>', methods=['GET'])	#cannot use get here
+@flask_login.login_required
+def like_photo(pid):
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	user = userController.getUserFromId(uid)
+	photos = photoController.getPhotos()
+	likeController.likePhoto(pid, uid)
+	return render_template('hello.html', message='You like the photo', photos=photos, name=user[1], uid=user[0])
+
+#comment on a photo on default page, may not be user
+@app.route('/comment/<pid>', methods=['POST'])
+@flask_login.login_required
+def leave_comment(pid):
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	user = userController.getUserFromId(uid)
+	photos = photoController.getPhotos()
+	ownerId = photoController.getPhotoOwner(pid)[0]
+	print "uid: " + str(uid) + "ownerId: " + str(ownerId)
+	date = datetime.date.today()
+	comment = request.form.get('comment')
+	print "ownerId: " + str(ownerId)
+	if uid == ownerId:
+		return render_template('hello.html', message='You cannot comment your own photo', photos=photos, name=user[1], uid=uid)
+	else:
+		commentController.addComment(comment, uid, date, pid)
+		user = userController.getUserFromId(uid)
+		return render_template('hello.html', message='Add comment success', photos=photos, name=user[1], uid=uid)
+
+#anonymous comment
+@app.route('/anocomment/<pid>', methods=['POST'])
+def leave_anonymous_comment(pid):
+	photos = photoController.getPhotos()
+	date = datetime.date.today()
+	comment = request.form.get('comment')
+	commentController.addAnoComment(comment, date, pid)
+	return render_template('hello.html', message='Add comment success', photos=photos)
+
+#view photos by tag
+@app.route('/viewbytag', methods=['GET'])	
+@flask_login.login_required
+def get_photo_by_tags():
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	tags = tagController.showTags()
+	return render_template('photobytag.html', message="View photo by tag", tags=tags, uid=uid)
+
+@app.route('/viewbytag', methods=['POST'])
+@flask_login.login_required
+def view_photo_by_tag():
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	tags = tagController.showTags()
+	description = request.form.get('tags')
+	personal = request.form.get('personal')
+	if personal == 1:
+		photos = photoController.getPhotoFromUserByTag(uid, tag)
+	else:
+		photos = photoController.getPhotoByTag(description)
+	return render_template('photobytag.html', message="View photo by " + description, tags=tags, photos=photos, uid=uid)
+
+@app.route('/searchbytag', methods=['POST'])
+@flask_login.login_required
+def search_by_tag():
+	uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	tags = tagController.showTags()
+	descriptions = request.form.get("descriptions")
+	descriptions = tagController.strToTags(descriptions)
+	photos = photoController.searchByMultiTag(descriptions)
+	return render_template('photobytag.html', message="View photo by all the tags", tags=tags, photos=photos, uid=uid)
+
 
 #default page  
 @app.route("/", methods=['GET'])
 def hello():
-	photos = photoController.getPhotos()
-	return render_template('hello.html', message='Welecome to Photoshare', photos=photos)
+	try:
+		uid = userController.getUserIdFromEmail(flask_login.current_user.id)
+	except:
+		photos = photoController.getPhotos()
+		return render_template('hello.html', message='Welecome to Photoshare', photos=photos)
+	else:
+		user = userController.getUserFromId(uid)
+		photos = photoController.getPhotos()
+		print "user=" + str(user)
+		return render_template('hello.html', message='Welecome to Photoshare', photos=photos, name=user[1], uid=user[0])
 
 
 if __name__ == "__main__":

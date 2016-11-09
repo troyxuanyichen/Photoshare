@@ -1,5 +1,12 @@
 from connection import initConnection as connection
 
+#get album from id
+def getAlbumFromId(aid):
+	conn = connection.init_connection()
+	cursor = conn.cursor()
+	cursor.execute("SELECT * FROM albums WHERE albumId ='{0}'".format(aid))
+	return cursor.fetchone()
+	
 #get the album of a user 
 def getUserAlbumLimited(uid):
 	conn = connection.init_connection()
@@ -29,14 +36,22 @@ def getNameFromAlbumId(aid):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
 	cursor.execute("SELECT name FROM albums WHERE albumId = '{0}'".format(aid))
-	return cursor.fetchone()[0]
+	return cursor.fetchone()[0]	#todo
 
 #delete the album
 def deleteAlbum(aid):
-	conn = connection.int_connection()
+	conn = connection.init_connection()
 	cursor = conn.cursor()
+	print "aid=" + str(aid)
 	if cursor.execute("DELETE FROM albums WHERE albumId = '{0}'".format(aid)):
+		conn.commit()
 		return True
 	else:
 		return False
 
+#get the album id from photo id
+def getAlbumIdFromPhoto(pid):
+	conn = connection.init_connection()
+	cursor = conn.cursor()
+	cursor.execute("SELECT albumId FROM photos WHERE photoId = '{0}'".format(pid))
+	return cursor.fetchone()

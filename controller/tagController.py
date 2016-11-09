@@ -38,9 +38,17 @@ def showPhotoTags(pid):
 
 #generate tags from string
 def strToTags(string):
-	list = str.split(" ")
+	list = string.split(" ")
 	tags = []
 	for i in list:
 		if i:
 			tags.append(i)
+	print tags
 	return tags
+
+#sort tags by frequency
+def tagsByFrequency():
+	conn = connection.init_connection()
+	cursor = conn.cursor()
+	cursor.execute("SELECT tagDescription, COUNT(tagDescription) AS theCount FROM photo_tag GROUP BY tagDescription ORDER BY theCount ASC")
+	return cursor.fetchall[0]

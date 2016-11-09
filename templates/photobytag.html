@@ -1,0 +1,36 @@
+{% if message %}
+  <h4>{{message}}!</h4>
+{% endif %}
+
+{% if tags %}
+<form method="post" action="/viewbytag" enctype="multipart/form-data">
+    <select name="tags">
+    	{% for tag in tags%}
+    		<option value={{tag[0]}}>{{tag[0]}}</option>
+    	{% endfor%}
+    </select>
+    {% if uid %}
+  		<input type="checkbox" name="personal" value="1">Yours<br>
+    {% endif %}
+    <input type="submit" value="Show"/>
+ </form>
+ {% endif %}
+
+ <!-- <form method="post" action="/searchbytag">
+    <input type="text" name="descriptions"><br>
+    <input type="submit" value="search by type"/>
+ </form> -->
+
+ {% if photos%}
+ 	<ul>
+ 		{% for photo in photos %}
+ 			<li>
+ 				<img src='data:image/png;base64, {{photo[1]}}' style="height: 100px">
+                <p>caption: {{photo[2]}}</p>
+                <p>{{photo[3]}} people like this</p>
+ 			</li>
+ 		{% endfor %}
+ 	</ul>
+ {% endif%}
+
+ <!-- <a href="/mostpopulartag">View Most popular tags</a> -->

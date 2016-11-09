@@ -14,7 +14,7 @@ def showNumOfLike(pid):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
 	cursor.execute("SELECT likeNum FROM photo WHERE photoId = '{0}'".format(pid))
-	return cursor.fetchone()[0][0]
+	return cursor.fetchone()[0]
 
 #show who like this photo
 def showPeopleWhoLike(pid):

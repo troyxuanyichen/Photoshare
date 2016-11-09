@@ -15,6 +15,18 @@
 		</select>
 		<input type="submit" name="view" value="View photos"></input>
 	</form>
+
+	<form method="POST" action="{{ url_for('delete_album') }}">
+	  	<fieldset>
+	  	<legend>Delete album:</legend>
+		<select name="album">
+			{% for album in albums %}
+				<option value={{album[0]}}>{{album[1]}}</option>
+			{% endfor %}
+		</select>
+		<input type="submit" name="delete" value="Delete album"></input>
+		</fieldset>
+	</form>
 {% else %}
 	<p>Let's create an album first</p>
 {% endif %}
@@ -27,3 +39,4 @@
 	<input type="submit" name="Add album"></input>
 	</fieldset>
 </form>
+<a href='/'>Home</a>

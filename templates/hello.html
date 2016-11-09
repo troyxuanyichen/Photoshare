@@ -7,19 +7,43 @@
   <h1>Hello {{ name }}!</h1>
 {% endif %}
 
-{% if photos %}
-<h2>Here's all the photos</h2>
-    <ul>
-    {% for photo in photos %}
-        <li>
-        	<img src="data:image/png;base64, {{photo[1]}}" style="height: 100px"/>
-        	<input type="submit" name="MySecondBtn" value="like" OnClick="document.forms['MyForm'].action = 'Destination2.aspx'" >
-        	<input type="submit" name="MySecondBtn" value="comment" OnClick="document.forms['MyForm'].action = 'Destination2.aspx'" >
-        </li>
-    {% endfor %}
-    </ul>
+{% if uid %}
+<!--     <p>user id: {{uid}}</p>
+ -->    {% if photos %}
+        <h2>Here's all the photos</h2>
+        <ul>
+        {% for photo in photos %}
+            <li>
+            	<img src="data:image/png;base64, {{photo[1]}}" style="height: 100px"/>
+                <a href="like/{{photo[0]}}">like</a>
+                <form method = "post" enctype="multipart/form-data" action="/comment/{{photo[0]}}">
+                    <label for="comment">Enter comment:</label>
+                    <input type="text" name="comment"/>
+                    <input type="submit" value="Add comment" />
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% else %}
+    {% if photos %}
+        <h2>Here's all the photos</h2>
+        <ul>
+        {% for photo in photos %}
+            <li>
+                <img src="data:image/png;base64, {{photo[1]}}" style="height: 100px"/>
+                <form method = "post" enctype="multipart/form-data" action="/anocomment/{{photo[0]}}">
+                    <label for="comment">Enter comment:</label>
+                    <input type="text" name="comment"/>
+                    <input type="submit" value="Add comment" />
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
 {% endif %}
 
+<!-- <form method = "post" action="/"></form> -->
 <!-- {% if friends %} -->
 <!-- {% endif %} -->
 
@@ -34,6 +58,7 @@
 {% if name %}
 <li><a href="/friend">View friends</a></li>
 <li><a href="/album">View albums</a></li>
+<li><a href="/viewbytag">View photo by tag</a></li>
 <li><a href='/logout'>Logout</a></li>
 {% endif %}
 <li><a href='/'>Home</a></li>

@@ -19,7 +19,8 @@ def getPhotoById(pid):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
 	cursor.execute("SELECT photoId, caption, data, likeNum FROM photos WHERE photoId = '{0}'".format(pid))
-	return cursor.fetchone()[0]
+	return cursor.fetchone()	#may be problem
+
 #get all the photo from a user
 def getPhotoFromUser(uid):
 	conn = connection.init_connection()
@@ -31,14 +32,14 @@ def getPhotoFromUser(uid):
 def getPhotoOwner(pid):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
-	cursor.execute("SELECT A.ownerId, A.email FROM photo_album PA, album A WHERE PA.albumId = A.albumId AND PA.photoId = '{0}'".format(pid))
-	return cursor.fetchone()[0]
+	cursor.execute("SELECT A.ownerId FROM photo_album PA, albums A WHERE PA.albumId = A.albumId AND PA.photoId = '{0}'".format(pid))
+	return cursor.fetchone()
 
 #get photo id from photo data
 def getIdFromData(data):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
-	if cursor.execute("SELECT albumId FROM photos WHERE data ='{0}'".format(data)):
+	if cursor.execute("SELECT photoId FROM photos WHERE data ='{0}'".format(data)):
 		photoId = cursor.fetchone()[0]
 		return photoId
 	else:
@@ -66,22 +67,31 @@ def uploadPhoto(aid, caption, data):
 def getPhotoByTag(des):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
-	cursor.execute("SELECT P.photoId, P.data FROM photos P, photo_tag PT WHERE P.photoId = PT.photoId AND PT.tagDescription = '{0}'".format(des))
+	cursor.execute("SELECT P.photoId, P.data, P.caption, P.likeNum FROM photos P, photo_tag PT WHERE P.photoId = PT.photoId AND PT.tagDescription = '{0}'".format(des))
 	return cursor.fetchall()
 
 #get all photos of a user by tag
-def getPhotoFromUserByTag(email, des):
+def getPhotoFromUserByTag(uid, des):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
-	cursor.execute("SELECT P.photoId, P.data FROM photos P, photo_tag PT, albuMS A, users U WHERE P.photoId = PT.photoId AND P.albumId = A.albumId AND A.ownerId = U.userId AND U.email = '{0}' AND PT.tagDescription = '{1}'".format(email, des))
+	cursor.execute("SELECT P.photoId, P.data FROM photos P, photo_tag PT, albuMS A, users U WHERE P.photoId = PT.photoId AND P.albumId = A.albumId AND A.ownerId = U.userId AND U.userId = '{0}' AND PT.tagDescription = '{1}'".format(uid, des))
 
 #delete one photo by id
 def deletePhoto(pid):
 	conn = connection.init_connection()
 	cursor = conn.cursor()
 	if cursor.execute("DELETE FROM photos WHERE photoId = '{0}'".format(pid)):
-		conn.commit
+		conn.commit()
 		return True
 	else:
 		return False
 
+#search photos that satisfy a tag, require photos
+def searchByMultiTag(des):
+	conn = connection.init_connection()
+	cursor = conn.cursor()
+	# print "des: " + str(des)
+	cursor.execute("SELECT P.photoId FROM photos P WHERE NOT EXISTS (SELECT T.description FROM tags T WHERE T.description IN '{0}' EXCEPT (SELECT PT.tagDescription FROM photo_tag PT WHERE PT.photoId = P.photoId))".format(des))
+	# photoIds = cursor.fetchall()
+	# searchByTagInPhotos(des, photos)
+	return cursor.fetchall()

@@ -1,6 +1,5 @@
 <head>
     <title>Your photos</title>
-    <script src="jquery-3.1.1.min.js"></script>
 </head>
 {% if message %}
   <h4>{{message}}!</h4>
@@ -11,44 +10,21 @@
 		{% for photo in photos %}
 			<li>
 				<a href='/managephoto/{{photo[0]}}'>
-					<img src='data:image/png;base64, {{photo[1]}}'>
+					<img src='data:image/png;base64, {{photo[1]}}' style="height: 100px">
 				</a>
+        <a href="/deletephoto/{{photo[0]}}">Delete photo</a>
 			</li>
 		{% endfor %}
 	</ul>
-	<button>Delete photo</button>
 {% endif %}
 
-<form method="post" action="{{ url_for('upload_photo') }}" enctype="multipart/form-data">
+<form method="post" action="/uploadtoalbum/{{aid}}" enctype="multipart/form-data">
     <label for="photo">Select photo:</label>
     <input type="file" name="photo" required='true'/><br />
     <label for="caption">Please caption:</label>
     <input type="text" name="caption" required='true'/><br />
-
-    <select name="albums">
-        {% if aid %}
-            {% for album in albums %}
-                <option value={{album[0]}}>{{album[1]}}</option>
-            {% endfor %}
-        {% endif %}
-    </select>
+    <label for="tags">Add tags:</label>
+    <input type="text" name="tags"/><br />
     <input type="submit" value="Upload"/>
  </form>
-<!-- <script>
-
-$("#deletePhoto").click(function(){
-	alert("Are you sure you want to delete the photo?");
-	$.ajax({
-   		type:'GET',
-   		dataType: 'json',
-   		url :"/tournament",
-   		success: function(data) {
-        	console.log('success',data);
-   		},
-   		error:function(jqXHR,textStatus,errorThrown ){
-      		alert('Exception:'+errorThrown );
-   		}
-	});
-}); 
-</script>
- -->
+ <a href='/'>Home</a>

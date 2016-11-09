@@ -48,6 +48,13 @@ def addFriend(uid, friendId):
 	# else:
 	# 	return False
 
+#get user info from id
+def getUserFromId(uid):
+	conn = connection.init_connection()
+	cursor = conn.cursor()
+	cursor.execute("SELECT userId, email FROM users WHERE userId ='{0}'".format(uid))
+	return cursor.fetchone()
+
 #get the photo of the user
 def getUserPhotos(uid):
 	conn = connection.init_connection()
@@ -77,5 +84,6 @@ def isEmailUnique(email):
 def getActiveUser():
 	conn = connection.init_connection()
 	cursor = conn.cursor()
-	cursor.execute("SELECT U.email FROM users U, albums A, photo_album PA WHERE U.userId = A.ownerId AND A.albumId = PA.albumId GROUP BY U.email ORDER BY ()DESC LIMIT 10")	#TODO
+	cursor.execute("SELECT U.uerId FROM users U, albums A, photo_album PA WHERE U.userId = A.ownerId AND A.albumId = PA.albumId GROUP BY U.email ORDER BY  DESC LIMIT 10")	#TODO
+
 

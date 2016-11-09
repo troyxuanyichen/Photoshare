@@ -1,6 +1,39 @@
 <head>
     <title>Manage this photo</title>
 </head>
-{% if photo %}
-	<img>
+{% if message %}
+  <h4>{{message}}!</h4>
 {% endif %}
+{% if photo %}
+	<img src='data:image/png;base64, {{photo[2]}}' style="height: 100px">
+	<p>caption: {{photo[1]}}</p>
+	<p>{{photo[3]}} people like this</p>
+{% endif %}
+<!-- tags -->
+{% if tags %}
+<p>tags</p>
+<ul>
+	{% for tag in tags %}
+	<li>{{tag[0]}}</li>
+	{% endfor%}
+</ul>
+{% endif%}
+<!-- people who like -->
+{% if people %}
+<p>People who like this photo</p>
+<ul>
+	{% for person in people %}
+	<li>{{person[1]}}</li>
+	{% endfor%}
+</ul>
+{% endif %}
+
+{% if comments %}
+<p>Comments</p>
+<ul>
+	{% for comment in comments %}
+	<li>{{comment[0]}} by {{comment[1]}} at {{comment[3]}}</li>
+	{% endfor%}
+</ul>
+{% endif %}
+<a href='/'>Home</a>
